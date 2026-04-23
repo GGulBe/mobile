@@ -1,0 +1,81 @@
+package com.example.testcal;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    // Step 3-2. 객체 선언
+    EditText edtSentence;
+    Button btnSubmit, btnRemoveGa, btnRemoveNa;
+    TextView tvSentenceView;
+
+    String currentText = ""; // 현재 유지되는 문자열
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Step 3-3. findViewById 작성
+        edtSentence = findViewById(R.id.edtSentence);
+        btnSubmit = findViewById(R.id.btnSubmit);
+        btnRemoveGa = findViewById(R.id.btnRemoveGa);
+        btnRemoveNa = findViewById(R.id.btnRemoveNa);
+        tvSentenceView = findViewById(R.id.tvSentenceView);
+
+        // Step 3-4. 리스너 및 Step 4. 이벤트 처리 로직 작성
+
+        // 1. 등록 버튼 (회원가입 폼과 유사한 문자열 비교 예외처리)
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String input = edtSentence.getText().toString();
+
+                // 문자열 비교를 통한 예외 처리
+                if (input.trim().equals("")) {
+                    Toast.makeText(MainActivity.this, "오류: 문장을 입력해주세요!", Toast.LENGTH_SHORT).show();
+                } else if (input.length() < 3) {
+                    Toast.makeText(MainActivity.this, "오류: 최소 3글자 이상 입력하세요.", Toast.LENGTH_SHORT).show();
+                } else if (input.contains("바보")) {
+                    Toast.makeText(MainActivity.this, "오류: 금지어가 포함되어 있습니다.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // 예외처리를 통과하면 텍스트뷰에 출력
+                    currentText = input;
+                    tvSentenceView.setText("현재 문장: " + currentText);
+                    Toast.makeText(MainActivity.this, "정상적으로 등록되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // 2. '가' 지우기 버튼
+        btnRemoveGa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!currentText.equals("")) {
+                    // String의 replace 메소드를 사용해 '가' 문자를 공백(제거)으로 변환
+                    currentText = currentText.replace("가", "");
+                    tvSentenceView.setText("현재 문장: " + currentText);
+                }
+            }
+        });
+
+        // 3. '나' 지우기 버튼
+        btnRemoveNa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!currentText.equals("")) {
+                    // String의 replace 메소드를 사용해 '나' 문자를 공백(제거)으로 변환
+                    currentText = currentText.replace("나", "");
+                    tvSentenceView.setText("현재 문장: " + currentText);
+                }
+            }
+        });
+    }
+}
