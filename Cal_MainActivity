@@ -1,0 +1,131 @@
+package com.example.calculator;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    TextView tvDisplay;
+
+    // 계산을 위한 기초 변수 선언 (Stack, List 대신 사용)
+    String mStrResult = ""; // 화면에 표시될 전체 수식
+    String currentNumber = ""; // 현재 입력 중인 숫자
+    double num1 = 0; // 첫 번째 숫자
+    String operator = ""; // 연산자 (+, -, *, /)
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        tvDisplay = findViewById(R.id.tv_display);
+
+        // 1. 숫자 버튼 리스너 (0~9, 소수점)
+        View.OnClickListener numListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button b = (Button) v;
+                currentNumber += b.getText().toString(); // 현재 숫자에 이어붙임
+                mStrResult += b.getText().toString();    // 전체 화면 문자열에 이어붙임
+                tvDisplay.setText(mStrResult);
+            }
+        };
+
+        // 숫자 버튼들 찾아서 리스너 연결 (배열과 반복문 활용)
+        int[] numBtnIds = {
+                R.id.btn_0, R.id.btn_1, R.id.btn_2, R.id.btn_3, R.id.btn_4,
+                R.id.btn_5, R.id.btn_6, R.id.btn_7, R.id.btn_8, R.id.btn_9, R.id.btn_dot
+        };
+        for (int i = 0; i < numBtnIds.length; i++) {
+            findViewById(numBtnIds[i]).setOnClickListener(numListener);
+        }
+
+        // 2. 연산자 버튼 리스너 (+, -, *, /)
+        View.OnClickListener opListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button b = (Button) v;
+                if (!currentNumber.equals("")) {
+                    num1 = Double.parseDouble(currentNumber); // 지금까지 입력된 숫자를 num1에 저장
+                    operator = b.getText().toString(); // 클릭한 연산자 기호 저장
+                    currentNumber = ""; // 다음 숫자를 입력받기 위해 비워줌
+
+                    mStrResult += operator; // 화면에는 연산자를 추가해서 보여줌
+                    tvDisplay.setText(mStrResult);
+                }
+            }
+        };
+
+        int[] opBtnIds = { R.id.btn_plus, R.id.btn_minus, R.id.btn_mul, R.id.btn_div };
+        for (int i = 0; i < opBtnIds.length; i++) {
+            findViewById(opBtnIds[i]).setOnClickListener(opListener);
+        }
+
+        // 3. 계산(=) 버튼
+        findViewById(R.id.btn_equal).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!currentNumber.equals("") && !operator.equals("")) {
+                    double num2 = Double.parseDouble(currentNumber); // 두 번째 숫자
+                    double result = 0;
+
+                    // if 조건문으로 사칙연산 수행 (단순한 로직)
+                    if (operator.equals("+")) {
+                        result = num1 + num2;
+                    } else if (operator.equals("-")) {
+                        result = num1 - num2;
+                    } else if (operator.equals("*")) {
+                        result = num1 * num2;
+                    } else if (operator.equals("/")) {
+                        if (num2 == 0) {
+                            Toast.makeText(getApplicationContext(), "0으로 나눌 수 없습니다.", Toast.LENGTH_SHORT).show();
+                            return; // 에러 시 계산 중단
+                        }
+                        result = num1 / num2;
+                    }
+
+                    // 계산 결과 출력 (.0으로 끝나는 정수는 소수점 제거)
+                    mStrResult = String.valueOf(result).replace(".0", "");
+                    tvDisplay.setText(mStrResult);
+
+                    // 연속 계산을 위해 결과값을 다시 num1 위치(currentNumber)로 설정
+                    currentNumber = mStrResult;
+                    operator = "";
+                }
+            }
+        });
+
+        // 4. 초기화(C) 버튼
+        findViewById(R.id.btn_clear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStrResult = "";
+                currentNumber = "";
+                num1 = 0;
+                operator = "";
+                tvDisplay.setText("");
+            }
+        });
+
+        // 5. 하나씩 지우기(DEL) 버튼 (버퍼에서 하나씩 지워짐 기능)
+        findViewById(R.id.btn_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mStrResult.length() > 0) {
+                    // 전체 수식에서 맨 뒤 한 글자 삭제
+                    mStrResult = mStrResult.substring(0, mStrResult.length() - 1);
+
+                    // 현재 입력 중인 숫자에서도 맨 뒤 한 글자 삭제
+                    if (currentNumber.length() > 0) {
+                        currentNumber = currentNumber.substring(0, currentNumber.length() - 1);
+                    }
+                    tvDisplay.setText(mStrResult);
+                }
+            }
+        });
+    }
+}
