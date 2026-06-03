@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/tab1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="10dp">
+                <DatePicker android:id="@+id/datePicker" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                <TimePicker android:id="@+id/timePicker" android:layout_width="wrap_content" android:layout_height="wrap_content" android:timePickerMode="spinner" />
+                <Chronometer android:id="@+id/chronometer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="20sp" />
+                <Button android:id="@+id/btnStart" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="예약 시작" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <EditText android:id="@+id/editName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="이름" />
+                <EditText android:id="@+id/editId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="학번" />
+                <EditText android:id="@+id/editPhone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="전화번호" />
+                <EditText android:id="@+id/editAge" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="나이" />
+                <Button android:id="@+id/btnComplete" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="예약 완료" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView android:id="@+id/txtResult" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="입력된 정보가 없습니다." android:textSize="18sp" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</TabHost>
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+package com.example.test;
+
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.TabHost;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+    DatePicker dp; TimePicker tp; Chronometer chrono;
+    EditText etName, etId, etPhone, etAge;
+    TextView tvResult;
+    Button btnStart, btnComplete;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        TabHost tabHost = findViewById(android.R.id.tabhost);
+        tabHost.setup();
+
+        // 탭 구성 (TabSpec 생성 시 경고가 발생한다면, 이는 TabHost 클래스 자체가 지향하는 방향이 바뀌었기 때문입니다.)
+        // 기능은 정상 작동하므로 경고는 무시하셔도 무방합니다.
+        TabHost.TabSpec ts1 = tabHost.newTabSpec("T1").setIndicator("예약").setContent(R.id.tab1);
+        tabHost.addTab(ts1);
+        TabHost.TabSpec ts2 = tabHost.newTabSpec("T2").setIndicator("정보").setContent(R.id.tab2);
+        tabHost.addTab(ts2);
+        TabHost.TabSpec ts3 = tabHost.newTabSpec("T3").setIndicator("결과").setContent(R.id.tab3);
+        tabHost.addTab(ts3);
+
+        dp = findViewById(R.id.datePicker); tp = findViewById(R.id.timePicker);
+        chrono = findViewById(R.id.chronometer);
+        etName = findViewById(R.id.editName); etId = findViewById(R.id.editId);
+        etPhone = findViewById(R.id.editPhone); etAge = findViewById(R.id.editAge);
+        btnStart = findViewById(R.id.btnStart);
+        btnComplete = findViewById(R.id.btnComplete);
+        tvResult = findViewById(R.id.txtResult);
+
+        // 예약 시작
+        btnStart.setOnClickListener(v -> {
+            chrono.setBase(SystemClock.elapsedRealtime());
+            chrono.start();
+        });
+
+        // 예약 완료 시 시간 멈춤 및 결과 저장
+        btnComplete.setOnClickListener(v -> {
+            chrono.stop(); // 타이머 멈춤
+            Toast.makeText(getApplicationContext(), "예약이 완료되었습니다!", Toast.LENGTH_SHORT).show();
+
+            String res = "이름: " + etName.getText() + "\n학번: " + etId.getText() +
+                    "\n전화번호: " + etPhone.getText() + "\n나이: " + etAge.getText() +
+                    "\n예약일: " + dp.getYear() + "년 " + (dp.getMonth()+1) + "월 " + dp.getDayOfMonth() + "일" +
+                    "\n예약 시간: " + tp.getHour() + "시 " + tp.getMinute() + "분" +
+                    "\n소요 시간: " + chrono.getText(); // 크로노미터에 표시된 시간 가져오기
+            tvResult.setText(res);
+        });
+    }
+}
