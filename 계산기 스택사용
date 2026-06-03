@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tv_display"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#F0F0F0"
+        android:gravity="bottom|end"
+        android:padding="10dp"
+        android:text=""
+        android:textSize="35sp"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/tv_result_only"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="결과 : "
+        android:textSize="20sp"
+        android:textColor="#FF5722"
+        android:padding="10dp"
+        android:gravity="end" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:layout_margin="10dp">
+
+        <Button android:id="@+id/btn_clear" android:text="C"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_delete" android:text="DEL"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_percentage" android:text="%"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_div" android:text="/"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+
+        <Button android:id="@+id/btn_7" android:text="7"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_8" android:text="8"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_9" android:text="9"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_mul" android:text="*"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+
+        <Button android:id="@+id/btn_4" android:text="4"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_5" android:text="5"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_6" android:text="6"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_minus" android:text="-"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+
+        <Button android:id="@+id/btn_1" android:text="1"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_2" android:text="2"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_3" android:text="3"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_plus" android:text="+"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+
+        <Button android:id="@+id/btn_sign" android:text="+/-"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_0" android:text="0"
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_dot" android:text="."
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+        <Button android:id="@+id/btn_equal" android:text="="
+            android:layout_columnWeight="1" android:layout_height="60dp" />
+
+    </GridLayout>
+
+</LinearLayout>
+
+
+
+
+
+
+
+
+
+
+
+package com.example.calculator;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
+public class MainActivity extends AppCompatActivity {
+
+    // 교안 Ch 03, 04: 위젯 변수 선언
+    TextView tvDisplay, tvResultOnly;
+
+    // 반복문을 쓰기 위해 버튼들을 배열로 관리
+    Button[] numButtons = new Button[10]; // 0~9 숫자 버튼
+    Button[] opButtons = new Button[5];   // +, -, *, /, . 버튼
+
+    // 숫자 버튼 ID 배열
+    Integer[] numBtnIds = {
+            R.id.btn_0, R.id.btn_1, R.id.btn_2, R.id.btn_3, R.id.btn_4,
+            R.id.btn_5, R.id.btn_6, R.id.btn_7, R.id.btn_8, R.id.btn_9
+    };
+
+    // 연산자 버튼 ID 배열
+    Integer[] opBtnIds = {
+            R.id.btn_plus, R.id.btn_minus, R.id.btn_mul, R.id.btn_div, R.id.btn_dot
+    };
+
+    String mStrResult = ""; // 현재 수식 저장
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Ch 04 방식: findViewById 연결
+        tvDisplay = (TextView) findViewById(R.id.tv_display);
+        tvResultOnly = (TextView) findViewById(R.id.tv_result_only);
+
+        // 1. 공통 리스너 정의 (교안의 익명 내부 클래스 방식)
+        View.OnClickListener clkListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button b = (Button) v;
+                mStrResult += b.getText().toString();
+                tvDisplay.setText(mStrResult);
+            }
+        };
+
+        // 2. 숫자 버튼 연결 및 리스너 등록 (반복문)
+        for (int i = 0; i < numBtnIds.length; i++) {
+            numButtons[i] = (Button) findViewById(numBtnIds[i]);
+            numButtons[i].setOnClickListener(clkListener);
+        }
+
+        // 3. 연산자 버튼 연결 및 리스너 등록 (반복문)
+        for (int i = 0; i < opBtnIds.length; i++) {
+            opButtons[i] = (Button) findViewById(opBtnIds[i]);
+            opButtons[i].setOnClickListener(clkListener);
+        }
+
+        // 4. 개별 기능 버튼 처리
+        Button btnEqual = (Button) findViewById(R.id.btn_equal);
+        btnEqual.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calculate(); // 계산 실행
+            }
+        });
+
+        Button btnClear = (Button) findViewById(R.id.btn_clear);
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mStrResult = "";
+                tvDisplay.setText("");
+                tvResultOnly.setText("결과 : ");
+            }
+        });
+
+        Button btnDelete = (Button) findViewById(R.id.btn_delete);
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mStrResult.length() > 0) {
+                    mStrResult = mStrResult.substring(0, mStrResult.length() - 1);
+                    tvDisplay.setText(mStrResult);
+                }
+            }
+        });
+    }
+
+    // 계산 로직 (기존 스택 계산 방식 유지)
+    private void calculate() {
+        if (mStrResult.isEmpty()) return;
+
+        try {
+            // 계산을 위해 필요한 List와 Stack (Java 기본 문법)
+            List<Double> nums = new ArrayList<>();
+            List<Character> ops = new ArrayList<>();
+            StringBuilder tmp = new StringBuilder();
+
+            for (int i = 0; i < mStrResult.length(); i++) {
+                char ch = mStrResult.charAt(i);
+                if (Character.isDigit(ch) || ch == '.') tmp.append(ch);
+                else if ("+-*/".indexOf(ch) != -1) {
+                    if (tmp.length() > 0) {
+                        nums.add(Double.parseDouble(tmp.toString()));
+                        ops.add(ch);
+                        tmp.setLength(0);
+                    }
+                }
+            }
+            if (tmp.length() > 0) nums.add(Double.parseDouble(tmp.toString()));
+            if (nums.size() <= ops.size() || nums.isEmpty()) return;
+
+            Stack<Double> stack = new Stack<>();
+            stack.push(nums.get(0));
+            for (int i = 0; i < ops.size(); i++) {
+                char op = ops.get(i);
+                double next = nums.get(i + 1);
+                if (op == '*') stack.push(stack.pop() * next);
+                else if (op == '/') {
+                    if (next == 0) throw new ArithmeticException();
+                    stack.push(stack.pop() / next);
+                }
+                else if (op == '-') stack.push(-next);
+                else stack.push(next);
+            }
+
+            double res = 0;
+            while (!stack.isEmpty()) res += stack.pop();
+
+            String resStr = String.valueOf(res).replace(".0", "");
+            tvResultOnly.setText("결과 : " + resStr);
+            mStrResult = resStr;
+            tvDisplay.setText(mStrResult);
+
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "오류 발생", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
